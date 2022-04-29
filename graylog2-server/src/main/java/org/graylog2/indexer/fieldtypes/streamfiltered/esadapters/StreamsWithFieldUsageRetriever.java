@@ -14,15 +14,11 @@
  * along with this program. If not, see
  * <http://www.mongodb.com/licensing/server-side-public-license>.
  */
-package org.graylog2.indexer.fieldtypes;
+package org.graylog2.indexer.fieldtypes.streamfiltered.esadapters;
 
-import com.codahale.metrics.Timer;
-
-import java.util.Optional;
 import java.util.Set;
 
-public interface IndexFieldTypePollerAdapter {
-    Optional<Set<FieldTypeDTO>> pollIndex(String indexName, Timer pollTimer);
+public interface StreamsWithFieldUsageRetriever {
 
-    boolean maintainsStreamBasedFieldLists();
+    Set<String> getStreams(final String fieldName, final String indexName);
 }

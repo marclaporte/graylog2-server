@@ -18,9 +18,11 @@ package org.graylog.storage.elasticsearch7;
 
 import com.codahale.metrics.Timer;
 import org.graylog.storage.elasticsearch7.mapping.FieldMappingApi;
+import org.graylog2.Configuration;
 import org.graylog2.indexer.IndexNotFoundException;
 import org.graylog2.indexer.fieldtypes.FieldTypeDTO;
 import org.graylog2.indexer.fieldtypes.IndexFieldTypePollerAdapter;
+import org.graylog2.indexer.fieldtypes.streamfiltered.esadapters.StreamsWithFieldUsageRetriever;
 import org.graylog2.shared.utilities.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,10 +37,16 @@ import java.util.stream.Collectors;
 public class IndexFieldTypePollerAdapterES7 implements IndexFieldTypePollerAdapter {
     private static final Logger LOG = LoggerFactory.getLogger(IndexFieldTypePollerAdapterES7.class);
     private final FieldMappingApi fieldMappingApi;
+    private final boolean maintainsStreamBasedFieldLists;
+    private final StreamsWithFieldUsageRetriever streamsWithFieldUsageRetriever;
 
     @Inject
-    public IndexFieldTypePollerAdapterES7(FieldMappingApi fieldMappingApi) {
+    public IndexFieldTypePollerAdapterES7(final FieldMappingApi fieldMappingApi,
+                                          final Configuration configuration,
+                                          final StreamsWithFieldUsageRetriever streamsWithFieldUsageRetriever) {
         this.fieldMappingApi = fieldMappingApi;
+        this.maintainsStreamBasedFieldLists = configuration.maintainsStreamBasedFieldLists();
+        this.streamsWithFieldUsageRetriever = streamsWithFieldUsageRetriever;
     }
 
     @Override
@@ -63,11 +71,22 @@ public class IndexFieldTypePollerAdapterES7 implements IndexFieldTypePollerAdapt
                 .map(field -> {
                     final FieldMappingApi.FieldMapping mapping = field.getValue();
                     final Boolean fielddata = mapping.fielddata().orElse(false);
-                    return FieldTypeDTO.create(field.getKey(), mapping.type(), fielddata
-                            ? Collections.singleton(FieldTypeDTO.Properties.FIELDDATA)
-                            : Collections.emptySet());
+                    return FieldTypeDTO.builder()
+                            .fieldName(field.getKey())
+                            .physicalType(mapping.type())
+                            .properties(fielddata ?
+                                    Collections.singleton(FieldTypeDTO.Properties.FIELDDATA)
+                                    : Collections.emptySet())
+                            .streams(maintainsStreamBasedFieldLists ?
+                                    streamsWithFieldUsageRetriever.getStreams(field.getKey(), indexName)
+                                    : Set.of()).build();
                 })
                 .collect(Collectors.toSet())
         );
+    }
+
+    @Override
+    public boolean maintainsStreamBasedFieldLists() {
+        return maintainsStreamBasedFieldLists;
     }
 }
