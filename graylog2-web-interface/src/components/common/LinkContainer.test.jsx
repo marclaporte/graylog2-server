@@ -15,29 +15,35 @@
  * <http://www.mongodb.com/licensing/server-side-public-license>.
  */
 import * as React from 'react';
-import { render, waitFor } from 'wrappedTestingLibrary';
+import { render, screen, waitFor } from 'wrappedTestingLibrary';
 import { fireEvent } from '@testing-library/react';
+import { Route, Routes } from 'react-router-dom';
 
-import history from 'util/History';
 import { Button } from 'components/bootstrap';
 
 import { LinkContainer } from './router';
 
-jest.mock('util/History');
-
 describe('LinkContainer', () => {
   it('should use component passed in children', async () => {
-    const { findByText } = render((
-      <LinkContainer to="/">
-        <Button bsStyle="info">All Alerts</Button>
-      </LinkContainer>
+    render((
+      <Routes>
+        <Route path="/"
+               element={(
+                 <LinkContainer to="/alerts">
+                   <Button bsStyle="info">All Alerts</Button>
+                 </LinkContainer>
+                 )} />
+        <Route path="/alerts" element={<span>Hello world!</span>} />
+      </Routes>
     ));
 
-    const button = await findByText('All Alerts');
+    const button = await screen.findByText('All Alerts');
+
+    expect(screen.queryByText('Hello world!')).not.toBeInTheDocument();
 
     fireEvent.click(button);
 
-    expect(history.push).toHaveBeenCalledWith('/');
+    await screen.findByText('Hello world!');
   });
 
   it('should call onClick', async () => {
