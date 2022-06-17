@@ -99,7 +99,7 @@ export type LoadActiveResponse = LoadResponse & {
 };
 
 export type ActionsType = {
-  create: (AuthenticationBackendCreate) => Promise<LoadResponse>,
+  create: (request: AuthenticationBackendCreate) => Promise<LoadResponse>,
   delete: (authBackendId: $PropertyType<AuthenticationBackend, 'id'> | undefined | null, authBackendTitle: $PropertyType<AuthenticationBackend, 'title'>) => Promise<void>,
   load: (id: string) => Promise<LoadResponse>,
   loadActive: () => Promise<LoadActiveResponse>,
