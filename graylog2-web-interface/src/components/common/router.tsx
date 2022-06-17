@@ -16,10 +16,8 @@
  */
 import * as React from 'react';
 import { useCallback, useMemo } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import type { Location } from 'history';
-
-import history from 'util/History';
 
 export type HistoryElement = Location;
 
@@ -59,7 +57,8 @@ const LinkContainer = ({ children, onClick, to, ...rest }: Props) => {
   const { pathname } = useLocation();
   const { props: { onClick: childrenOnClick, className }, type: { displayName } } = React.Children.only(children);
   const childrenClassName = useMemo(() => _setActiveClassName(pathname, to, className, displayName), [pathname, to, className, displayName]);
-  const _onClick = useCallback((e) => {
+  const navigate = useNavigate();
+  const _onClick = useCallback((e: React.MouseEvent<HTMLElement>) => {
     if (!isLeftClickEvent(e) || isModifiedEvent(e)) {
       return;
     }
@@ -75,7 +74,7 @@ const LinkContainer = ({ children, onClick, to, ...rest }: Props) => {
       onClick();
     }
 
-    history.push(to);
+    navigate(to);
   }, [childrenOnClick, onClick, to]);
 
   return React.cloneElement(React.Children.only(children), { ...rest, className: childrenClassName, onClick: _onClick, href: to });
