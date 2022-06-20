@@ -16,18 +16,11 @@
  */
 import * as React from 'react';
 import { useCallback, useMemo } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import type { Location } from 'history';
+import { Link, useLocation, useLinkClickHandler } from 'react-router-dom';
 
-export type HistoryElement = Location;
+const _targetPathname = (target: string) => String(target).split(/[?#]/)[0];
 
-const _targetPathname = (to) => {
-  const target = typeof to?.pathname === 'string' ? to.pathname : to;
-
-  return String(target).split(/[?#]/)[0];
-};
-
-const _setActiveClassName = (pathname, to, currentClassName, displayName) => {
+const _setActiveClassName = (pathname: string, to: string, currentClassName: string, displayName: string) => {
   const targetPathname = _targetPathname(to);
   const isActive = targetPathname === pathname;
   const isButton = displayName === 'Button';
@@ -49,16 +42,16 @@ type Props = {
   to: string,
 };
 
-const isLeftClickEvent = (e) => (e.button === 0);
+const isLeftClickEvent = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => (e.button === 0);
 
-const isModifiedEvent = (e) => !!(e.metaKey || e.altKey || e.ctrlKey || e.shiftKey);
+const isModifiedEvent = (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => !!(e.metaKey || e.altKey || e.ctrlKey || e.shiftKey);
 
 const LinkContainer = ({ children, onClick, to, ...rest }: Props) => {
   const { pathname } = useLocation();
   const { props: { onClick: childrenOnClick, className }, type: { displayName } } = React.Children.only(children);
   const childrenClassName = useMemo(() => _setActiveClassName(pathname, to, className, displayName), [pathname, to, className, displayName]);
-  const navigate = useNavigate();
-  const _onClick = useCallback((e: React.MouseEvent<HTMLElement>) => {
+  const handleClick = useLinkClickHandler(to);
+  const _onClick = useCallback((e: React.MouseEvent<HTMLAnchorElement>) => {
     if (!isLeftClickEvent(e) || isModifiedEvent(e)) {
       return;
     }
@@ -74,7 +67,7 @@ const LinkContainer = ({ children, onClick, to, ...rest }: Props) => {
       onClick();
     }
 
-    navigate(to);
+    handleClick(e);
   }, [childrenOnClick, onClick, to]);
 
   return React.cloneElement(React.Children.only(children), { ...rest, className: childrenClassName, onClick: _onClick, href: to });
