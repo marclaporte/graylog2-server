@@ -20,7 +20,7 @@ import styled from 'styled-components';
 import type { $PropertyType } from 'utility-types';
 
 import type { EditWidgetComponentProps } from 'views/types';
-import usePluginEntities from 'views/logic/usePluginEntities';
+import usePluginEntities from 'hooks/usePluginEntities';
 import type SortConfig from 'views/logic/aggregationbuilder/SortConfig';
 import { Row, Col, Checkbox } from 'components/bootstrap';
 import FieldSelect from 'views/components/widgets/FieldSelect';
@@ -32,7 +32,7 @@ import type MessagesWidgetConfig from 'views/logic/widgets/MessagesWidgetConfig'
 import DescriptionBox from 'views/components/aggregationbuilder/DescriptionBox';
 import DecoratorSidebar from 'views/components/messagelist/decorators/DecoratorSidebar';
 import { HoverForHelp } from 'components/common';
-import { defaultCompare } from 'views/logic/DefaultCompare';
+import { defaultCompare } from 'logic/DefaultCompare';
 
 const FullHeightRow = styled(Row)`
   height: 100%;
@@ -53,9 +53,8 @@ const PreviewOptionCheckbox = styled(Checkbox)`
   }
 `;
 
-const _onFieldSelectionChanged = (fields, config, onChange) => {
-  const newFields = fields.map(({ value }) => value);
-  const newConfig = config.toBuilder().fields(newFields).build();
+const _onFieldSelectionChanged = (fields: Array<string>, config: MessagesWidgetConfig, onChange: (newConfig: MessagesWidgetConfig) => void) => {
+  const newConfig = config.toBuilder().fields(fields).build();
 
   return onChange(newConfig);
 };

@@ -15,14 +15,13 @@
  * <http://www.mongodb.com/licensing/server-side-public-license>.
  */
 import * as React from 'react';
-import { render, fireEvent, waitFor, screen, act } from 'wrappedTestingLibrary';
+import { render, fireEvent, waitFor, screen } from 'wrappedTestingLibrary';
 import selectEvent from 'react-select-event';
 import { List } from 'immutable';
 
-import { alice, adminUser } from 'fixtures/users';
+import { alice } from 'fixtures/users';
 import SharedEntity from 'logic/permissions/SharedEntity';
 import Grantee from 'logic/permissions/Grantee';
-import CurrentUserContext from 'contexts/CurrentUserContext';
 
 import SettingsSection from './SettingsSection';
 
@@ -68,22 +67,16 @@ describe('<SettingsSection />', () => {
   it('should allow session timeout name and timezone change', async () => {
     const onSubmitStub = jest.fn();
 
-    render(
-      <CurrentUserContext.Provider value={adminUser}>
-        <SettingsSection user={exampleUser} onSubmit={(data) => onSubmitStub(data)} />
-      </CurrentUserContext.Provider>,
-    );
+    render(<SettingsSection user={exampleUser} onSubmit={(data) => onSubmitStub(data)} />);
 
     const timeoutAmountInput = screen.getByPlaceholderText('Timeout amount');
     const timezoneSelect = screen.getByLabelText('Time Zone');
     const submitButton = screen.getByText('Update Settings');
 
-    act(() => {
-      fireEvent.change(timeoutAmountInput, { target: { value: '40' } });
-      selectEvent.openMenu(timezoneSelect);
-      selectEvent.select(timezoneSelect, 'Vancouver');
-      fireEvent.click(submitButton);
-    });
+    fireEvent.change(timeoutAmountInput, { target: { value: '40' } });
+    selectEvent.openMenu(timezoneSelect);
+    selectEvent.select(timezoneSelect, 'Vancouver');
+    fireEvent.click(submitButton);
 
     await waitFor(() => expect(onSubmitStub).toHaveBeenCalledTimes(1));
 

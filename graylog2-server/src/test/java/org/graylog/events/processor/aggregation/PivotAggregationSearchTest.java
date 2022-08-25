@@ -38,6 +38,7 @@ import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
 import java.util.Collections;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -53,11 +54,12 @@ public class PivotAggregationSearchTest {
     private EventDefinition eventDefinition;
     @Mock
     private MoreSearch moreSearch;
-    @Mock
-    private PermittedStreams permittedStreams;
+
+    private final PermittedStreams permittedStreams = new PermittedStreams(Stream::of);
 
     @Test
     public void testExtractValuesWithGroupBy() throws Exception {
+        final long WINDOW_LENGTH = 30000;
         final AbsoluteRange timerange = AbsoluteRange.create(DateTime.now(DateTimeZone.UTC).minusSeconds(3600), DateTime.now(DateTimeZone.UTC));
         final AggregationSeries seriesCount = AggregationSeries.create("abc123", AggregationFunction.COUNT, "source");
         final AggregationSeries seriesCard = AggregationSeries.create("abc123", AggregationFunction.CARD, "source");
@@ -67,8 +69,8 @@ public class PivotAggregationSearchTest {
                 .groupBy(Collections.emptyList())
                 .series(ImmutableList.of(seriesCount, seriesCard))
                 .conditions(null)
-                .searchWithinMs(30000)
-                .executeEveryMs(30000)
+                .searchWithinMs(WINDOW_LENGTH)
+                .executeEveryMs(WINDOW_LENGTH)
                 .build();
         final AggregationEventProcessorParameters parameters = AggregationEventProcessorParameters.builder()
                 .streams(Collections.emptySet())
@@ -153,6 +155,7 @@ public class PivotAggregationSearchTest {
 
     @Test
     public void testExtractValuesWithoutGroupBy() throws Exception {
+        final long WINDOW_LENGTH = 30000;
         final AbsoluteRange timerange = AbsoluteRange.create(DateTime.now(DateTimeZone.UTC).minusSeconds(3600), DateTime.now(DateTimeZone.UTC));
         final AggregationSeries seriesCount = AggregationSeries.create("abc123", AggregationFunction.COUNT, "source");
         final AggregationSeries seriesCountNoField = AggregationSeries.create("abc123", AggregationFunction.COUNT, "");
@@ -225,6 +228,7 @@ public class PivotAggregationSearchTest {
 
     @Test
     public void testExtractValuesWithNullValues() throws Exception {
+        final long WINDOW_LENGTH = 30000;
         final AbsoluteRange timerange = AbsoluteRange.create(DateTime.now(DateTimeZone.UTC).minusSeconds(3600), DateTime.now(DateTimeZone.UTC));
         final AggregationSeries seriesCount = AggregationSeries.create("abc123", AggregationFunction.COUNT, "source");
         final AggregationSeries seriesAvg = AggregationSeries.create("abc123", AggregationFunction.AVG, "some_field");
@@ -234,8 +238,8 @@ public class PivotAggregationSearchTest {
                 .groupBy(Collections.emptyList())
                 .series(ImmutableList.of(seriesCount, seriesAvg))
                 .conditions(null)
-                .searchWithinMs(30000)
-                .executeEveryMs(30000)
+                .searchWithinMs(WINDOW_LENGTH)
+                .executeEveryMs(WINDOW_LENGTH)
                 .build();
         final AggregationEventProcessorParameters parameters = AggregationEventProcessorParameters.builder()
                 .streams(Collections.emptySet())

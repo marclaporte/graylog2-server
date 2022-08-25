@@ -18,7 +18,7 @@
 import React, { useEffect, useState } from 'react';
 
 import { Spinner } from 'components/common';
-import usePluginEntities from 'views/logic/usePluginEntities';
+import usePluginEntities from 'hooks/usePluginEntities';
 import { EnterpriseActions } from 'stores/enterprise/EnterpriseStore';
 
 import IndexerFailuresComponent from './IndexerFailuresComponent';
@@ -32,7 +32,7 @@ const IndexerSystemOverviewComponent = () => {
   useEffect(() => {
     if (EnterpriseIndexerFailures) {
       EnterpriseActions.getLicenseInfo().then((response) => {
-        setLoadIndexerFailuresComponent(response.free_license_info.license_status === 'installed' ? <EnterpriseIndexerFailures /> : <IndexerFailuresComponent />);
+        setLoadIndexerFailuresComponent(response.license_info.license_status === 'installed' ? <EnterpriseIndexerFailures /> : <IndexerFailuresComponent />);
       });
     } else {
       setLoadIndexerFailuresComponent(<IndexerFailuresComponent />);
