@@ -25,11 +25,11 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import java.util.Map;
 
-public class AggregationBasedFieldTypeFilterAdapterProvider extends VersionAwareProvider<StreamsWithFieldUsageRetriever> {
+public class StreamsWithFieldUsageRetrieverProvider extends VersionAwareProvider<StreamsWithFieldUsageRetriever> {
 
     @Inject
-    public AggregationBasedFieldTypeFilterAdapterProvider(@DetectedSearchVersion SearchVersion version,
-                                                          Map<SearchVersion, Provider<StreamsWithFieldUsageRetriever>> pluginBindings) {
+    public StreamsWithFieldUsageRetrieverProvider(@DetectedSearchVersion SearchVersion version,
+                                                  Map<SearchVersion, Provider<StreamsWithFieldUsageRetriever>> pluginBindings) {
         super(version, pluginBindings);
     }
 }
